@@ -2,7 +2,7 @@
 
 Production-ready AI workflow automations built with **n8n** and **Python**. Live demos: the deployed site runs the same logic as the workflows.
 
-**🌐 Live site:** *(Vercel URL added after deploy)*
+**🌐 Live site:** https://ai-automation-toolkit-fahad-2b6d.vercel.app
 
 ## Automations
 
