@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fahad Khan — AI Automation Specialist</title>
+<meta name="description" content="AI-powered workflow automations by Fahad Khan: sponsorship outreach automation and a daily AI news digest, built with n8n and Python." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top"><span class="brand-mark">FK</span> Fahad Khan</a>
+    <div class="nav-links">
+      <a href="#sponsorship">Sponsorship Bot</a>
+      <a href="#digest">AI Digest</a>
+      <a href="#workflows">Workflows</a>
+      <a href="https://github.com/FahadAIForge/ai-automation-toolkit" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/fahad-khan-ai" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <p class="eyebrow">AI Automation Specialist · n8n · Python</p>
+    <h1>I build AI-powered automations that save businesses <span class="grad">time</span> and eliminate repetitive work.</h1>
+    <p class="lede">Two production-ready n8n workflows — a sponsorship outreach engine and a daily AI news digest. Try them live below; every demo runs the same logic as the real automation.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#sponsorship">Try the live demos</a>
+      <a class="btn btn-ghost" href="https://github.com/FahadAIForge/ai-automation-toolkit" target="_blank" rel="noopener">View source on GitHub</a>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><strong>2</strong><span>production automations</span></div>
+      <div class="stat"><strong>100%</strong><span>hands-free once running</span></div>
+      <div class="stat"><strong>n8n + Python</strong><span>core stack</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ AUTOMATION 1 ============ -->
+<section class="project" id="sponsorship">
+  <div class="wrap">
+    <p class="kicker">Automation 01</p>
+    <h2>Sponsorship Outreach Automation</h2>
+    <p class="desc">Every Monday at 9 AM, this workflow reads a sponsor list from Google Sheets, keeps only sponsors whose budget clears your minimum, sends each a personalized outreach email through Gmail, and marks them <em>Contacted</em> so nobody ever gets emailed twice.</p>
+
+    <div class="flow">
+      <div class="step"><span class="step-n">1</span><strong>Schedule</strong><span>Every Monday, 9:00 AM</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="step-n">2</span><strong>Google Sheets</strong><span>Read sponsor list</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="step-n">3</span><strong>Budget filter</strong><span>Budget ≥ $500, not contacted</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="step-n">4</span><strong>Gmail</strong><span>Personalized outreach</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="step-n">5</span><strong>Update sheet</strong><span>Mark as Contacted</span></div>
+    </div>
+
+    <div class="demo-card">
+      <h3>Live demo — the budget filter + email generator</h3>
+      <p class="demo-sub">This is the exact decision logic from the n8n workflow, running in your browser. Enter a sponsor and watch what the automation would do.</p>
+      <form id="sponsor-form" class="demo-form">
+        <label>Company <input id="f-company" type="text" value="Vertex Labs" required /></label>
+        <label>Contact name <input id="f-name" type="text" value="Sarah Chen" required /></label>
+        <label>Budget (USD) <input id="f-budget" type="number" value="1200" min="0" required /></label>
+        <label>Minimum budget <input id="f-min" type="number" value="500" min="0" required /></label>
+        <button class="btn btn-primary" type="submit">Run automation logic</button>
+      </form>
+      <div id="sponsor-result" class="demo-result" hidden></div>
+    </div>
+
+    <div class="chips">
+      <span>n8n</span><span>Google Sheets API</span><span>Gmail API</span><span>Cron scheduling</span><span>Data dedup</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AUTOMATION 2 ============ -->
+<section class="project alt" id="digest">
+  <div class="wrap">
+    <p class="kicker">Automation 02</p>
+    <h2>Daily AI Digest</h2>
+    <p class="desc">Every morning at 7 AM, this workflow pulls the latest AI news from TechCrunch and VentureBeat, keeps the top 8 stories, formats a clean mobile-friendly digest, and emails it to you — your AI briefing, before your coffee.</p>
+
+    <div class="flow">
+      <div class="step"><span class="step-n">1</span><strong>Schedule</strong><span>Daily, 7:00 AM</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="step-n">2</span><strong>RSS feeds</strong><span>TechCrunch + VentureBeat AI</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="step-n">3</span><strong>Filter + limit</strong><span>Top 8 stories</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="step-n">4</span><strong>Format</strong><span>HTML digest email</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="step-n">5</span><strong>Gmail</strong><span>Delivered to inbox</span></div>
+    </div>
+
+    <div class="demo-card">
+      <h3>Live demo — today's digest, generated right now</h3>
+      <p class="demo-sub">A serverless function runs the same fetch → filter → format pipeline as the n8n workflow and returns this morning's AI headlines.</p>
+      <button class="btn btn-primary" id="digest-btn">Generate today's digest</button>
+      <div id="digest-result" class="digest-list" hidden></div>
+    </div>
+
+    <div class="chips">
+      <span>n8n</span><span>RSS</span><span>Serverless</span><span>HTML email</span><span>Zero API cost</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORKFLOWS ============ -->
+<section class="workflows" id="workflows">
+  <div class="wrap">
+    <p class="kicker">Open source</p>
+    <h2>Import the real workflows</h2>
+    <p class="desc">Both n8n workflow files are in the GitHub repo — import them into your own n8n instance and they're ready to configure.</p>
+    <div class="file-grid">
+      <a class="file-card" href="workflows/sponsorship-outreach.json" download>
+        <strong>sponsorship-outreach.json</strong>
+        <span>n8n workflow · 8 nodes · Sheets → filter → Gmail</span>
+      </a>
+      <a class="file-card" href="workflows/daily-ai-digest.json" download>
+        <strong>daily-ai-digest.json</strong>
+        <span>n8n workflow · 9 nodes · RSS → digest email</span>
+      </a>
+      <a class="file-card" href="workflows/sponsors-sample.csv" download>
+        <strong>sponsors-sample.csv</strong>
+        <span>Sample sponsor sheet to get started</span>
+      </a>
+      <a class="file-card" href="workflows/SETUP-GUIDE.md" target="_blank" rel="noopener">
+        <strong>SETUP-GUIDE.md</strong>
+        <span>Step-by-step install &amp; configuration</span>
+      </a>
+    </div>
+    <a class="btn btn-ghost" href="https://github.com/FahadAIForge/ai-automation-toolkit" target="_blank" rel="noopener">Open the GitHub repository</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <p>Built by <strong>Fahad Khan</strong> — AI Automation Specialist</p>
+    <div class="foot-links">
+      <a href="https://github.com/FahadAIForge/ai-automation-toolkit" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/fahad-khan-ai" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

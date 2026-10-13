@@ -1,0 +1,329 @@
+{
+  "name": "Sponsorship Outreach Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Sponsorship Outreach Automation\n**What it does:** Every Monday 9 AM, reads sponsors from Google Sheets, filters those with budget >= minimum AND not yet contacted, sends a personalized outreach email via Gmail, and marks them as Contacted.\n\n**Setup (one-time):**\n1. Create a Google Sheet named with a tab `Sponsors` and columns: Company | Contact_Name | Email | Budget | Website | Niche | Status | Date_Contacted\n2. In n8n: connect your Google account on the two Google Sheets nodes + the Gmail node (click each node -> Select Credential -> Create New -> sign in with Google)\n3. Paste your Sheet ID into the two Google Sheets nodes (the ID in the sheet URL)\n4. Adjust `minBudget` in the Config node if needed. Activate the workflow.",
+        "height": 900,
+        "width": 2400,
+        "color": 4
+      },
+      "id": "122efeb9a13a4e3a",
+      "name": "NOTE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": 1,
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "aa951b825e704c0e",
+      "name": "Weekly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0e046bb052224433",
+              "name": "minBudget",
+              "type": "number",
+              "value": 500
+            },
+            {
+              "id": "76dd62369dce4ebd",
+              "name": "senderName",
+              "type": "string",
+              "value": "Fahad Khan"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b81982125aa0476e",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        300
+      ],
+      "notes": "Minimum sponsor budget (USD). Change here \u2014 no need to edit other nodes."
+    },
+    {
+      "parameters": {
+        "resource": "sheetWithinDocument",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sponsors",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "9d054ff32d5645e6",
+      "name": "Read Sponsors",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1080,
+        300
+      ],
+      "notes": "Paste your Google Sheet ID (from the sheet URL). Tab must be named 'Sponsors'."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "22882c0cba1c4e48",
+              "leftValue": "={{ $json.Budget }}",
+              "rightValue": "={{ $('Config').first().json.minBudget }}",
+              "operator": {
+                "type": "number",
+                "operation": "largerEqual"
+              }
+            },
+            {
+              "id": "967a70a628f34940",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Contacted",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e92265d900c74a17",
+      "name": "Filter Qualified",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        300
+      ],
+      "notes": "Keeps sponsors with Budget >= minBudget who have NOT been contacted yet."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce4f0d9d1d344ee5",
+              "name": "subject",
+              "type": "string",
+              "value": "=Partnership Opportunity \u2014 {{ $json.Company }}"
+            },
+            {
+              "id": "e643292eb5994a08",
+              "name": "body",
+              "type": "string",
+              "value": "=<p>Hi {{ $json.Contact_Name }},</p><p>I came across {{ $json.Company }} and was impressed by your work in {{ $json.Niche }}.</p><p>We are currently partnering with a small number of brands for premium sponsorship placements, and based on your profile, {{ $json.Company }} looks like a strong fit.</p><p>Would you be open to a brief 15-minute call next week to explore this?</p><p>Best regards,<br>{{ $('Config').first().json.senderName }}<br>AI Automation Specialist</p>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "43e11e5d8a184ae1",
+      "name": "Compose Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1640,
+        300
+      ],
+      "notes": "Personalizes subject + body per sponsor. Edit the template here."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.Email }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "HTML",
+        "message": "={{ $json.body }}",
+        "options": {
+          "senderName": "={{ $('Config').first().json.senderName }}"
+        }
+      },
+      "id": "5dc60741ecc44300",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Connect your Gmail account here (first run will ask you to sign in with Google)."
+    },
+    {
+      "parameters": {
+        "resource": "sheetWithinDocument",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sponsors",
+          "mode": "name"
+        },
+        "dataMode": "mapEachColumn",
+        "columnToMatchOn": "Email",
+        "valueToMatchOn": "={{ $json.Email }}",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Contacted",
+            "Date_Contacted": "={{ $now.format('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date_Contacted",
+              "displayName": "Date_Contacted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1b25c0dcc35b4f09",
+      "name": "Mark Contacted",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2200,
+        300
+      ],
+      "notes": "Marks the sponsor as Contacted so they are never emailed twice."
+    }
+  ],
+  "connections": {
+    "Weekly Schedule": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Read Sponsors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sponsors": {
+      "main": [
+        [
+          {
+            "node": "Filter Qualified",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Qualified": {
+      "main": [
+        [
+          {
+            "node": "Compose Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Email": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Mark Contacted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {}
+}

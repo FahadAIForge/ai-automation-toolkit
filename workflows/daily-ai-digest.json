@@ -1,0 +1,254 @@
+{
+  "name": "Daily AI Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Daily AI Digest\n**What it does:** Every morning at 7 AM, pulls the latest AI news from top RSS feeds, takes the 8 freshest stories, builds a clean HTML digest, and emails it to you.\n\n**Setup (one-time):**\n1. In n8n: connect your Gmail account on the Send Digest node (click -> Select Credential -> Create New -> sign in with Google)\n2. Put your email address in the Config node (`recipientEmail`)\n3. Activate the workflow. You will get the digest every morning.",
+        "height": 800,
+        "width": 2200,
+        "color": 4
+      },
+      "id": "71d925393364432c",
+      "name": "NOTE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 7,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "55e260d7b9574c49",
+      "name": "Daily Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee11fa1b46d64e6b",
+              "name": "recipientEmail",
+              "type": "string",
+              "value": "PASTE_YOUR_EMAIL_HERE"
+            },
+            {
+              "id": "dfbe63a7f0504be8",
+              "name": "maxStories",
+              "type": "number",
+              "value": 8
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8873b7d7b9574903",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        300
+      ],
+      "notes": "Put your email here to receive the digest."
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/"
+      },
+      "id": "13232d6978ae4ff8",
+      "name": "RSS: TechCrunch AI",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://venturebeat.com/category/ai/feed/"
+      },
+      "id": "9134da4084a9467a",
+      "name": "RSS: VentureBeat AI",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine"
+      },
+      "id": "36dece44394c47db",
+      "name": "Merge Feeds",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1640,
+        300
+      ],
+      "notes": "Combines both feeds into one list."
+    },
+    {
+      "parameters": {
+        "maxItems": "={{ $('Config').first().json.maxStories }}"
+      },
+      "id": "4fc3a1d0fa5247c4",
+      "name": "Top Stories",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        300
+      ],
+      "notes": "Keeps only the freshest N stories (N from Config)."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\nlet rows = items.map((it, i) => {\n  const j = it.json;\n  let src = 'AI News';\n  try { src = new URL(j.link).hostname.replace(/^www\\./, ''); } catch (e) {}\n  const desc = esc(j.contentSnippet || j.description || '').substring(0, 220);\n  return '<div style=\"margin-bottom:20px\">'\n    + '<div style=\"font-size:12px;color:#888;letter-spacing:1px\">' + (i+1) + ' &middot; ' + esc(src.toUpperCase()) + '</div>'\n    + '<a href=\"' + esc(j.link) + '\" style=\"font-size:17px;font-weight:bold;color:#0a66c2;text-decoration:none\">' + esc(j.title) + '</a>'\n    + '<p style=\"color:#444;font-size:14px;line-height:1.5;margin:6px 0 0\">' + desc + '...</p></div>';\n}).join('');\nconst date = new Date().toDateString();\nconst html = '<div style=\"font-family:Arial,sans-serif;max-width:640px;margin:0 auto\">'\n  + '<h2 style=\"color:#111\">&#129302; Daily AI Digest &mdash; ' + esc(date) + '</h2>'\n  + '<p style=\"color:#666;font-size:13px\">' + items.length + ' top AI stories, curated automatically.</p><hr style=\"border:none;border-top:1px solid #eee\">'\n  + rows\n  + '<hr style=\"border:none;border-top:1px solid #eee\"><p style=\"color:#999;font-size:12px\">Built with n8n by Fahad Khan</p></div>';\nreturn [{ json: { html, count: items.length, date } }];"
+      },
+      "id": "8856a58013774e29",
+      "name": "Build Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        300
+      ],
+      "notes": "Turns the stories into a clean, mobile-friendly HTML email."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $('Config').first().json.recipientEmail }}",
+        "subject": "={{ '\ud83e\udd16 Daily AI Digest \u2014 ' + $json.date }}",
+        "emailType": "HTML",
+        "message": "={{ $json.html }}",
+        "options": {
+          "senderName": "AI Digest Bot"
+        }
+      },
+      "id": "812b95b4faa041a1",
+      "name": "Send Digest",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2480,
+        300
+      ],
+      "notes": "Connect your Gmail account here."
+    }
+  ],
+  "connections": {
+    "Daily Schedule": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "RSS: TechCrunch AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "RSS: VentureBeat AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS: TechCrunch AI": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS: VentureBeat AI": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Feeds": {
+      "main": [
+        [
+          {
+            "node": "Top Stories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Stories": {
+      "main": [
+        [
+          {
+            "node": "Build Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Digest": {
+      "main": [
+        [
+          {
+            "node": "Send Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {}
+}
